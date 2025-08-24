@@ -9,6 +9,8 @@ const client = new Client({
     ],
 });
 
+const sentDMs = new Map(); // Store user DM messages by ID
+
 client.once("ready", () => {
     console.log(`✅ Logged in as ${client.user.tag}`);
 });
@@ -29,13 +31,37 @@ client.on("messageCreate", async (message) => {
 
         try {
             const user = await client.users.fetch(userId);
-            await user.send(dmMessage);
-            message.reply(`✅ Message sent to ${user.tag}`);
+            const sentMessage = await user.send(dmMessage);
+            sentDMs.set(sentMessage.id, sentMessage); // store sent message
+            message.reply(`✅ Message sent to ${user.tag} (ID: ${sentMessage.id})`);
         } catch (error) {
             console.error(error);
             message.reply("❌ Could not send the DM. Make sure the ID is correct and the user allows DMs.");
         }
     }
+
+    if (command === "!dm-edit") {
+        const msgId = args.shift();
+        const newMessage = args.join(" ");
+
+        if (!msgId || !newMessage) {
+            return message.reply("Usage: `!dm-edit <msg-id> <new-message>`");
+        }
+
+        const originalMessage = sentDMs.get(msgId);
+        if (!originalMessage) {
+            return message.reply("❌ Could not find a sent DM with that ID.");
+        }
+
+        try {
+            await originalMessage.edit(newMessage);
+            message.reply(`✅ DM edited successfully (ID: ${msgId})`);
+        } catch (error) {
+            console.error(error);
+            message.reply("❌ Failed to edit the DM.");
+        }
+    }
 });
 
 client.login(process.env.token);
+
