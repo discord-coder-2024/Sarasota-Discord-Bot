@@ -1,3 +1,5 @@
+if (global.botStarted) process.exit();
+global.botStarted = true;
 const { Client, GatewayIntentBits } = require("discord.js");
 require("dotenv").config();
 
