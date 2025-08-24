@@ -14,12 +14,39 @@ const client = new Client({
 
 const sentDMs = new Map();
 
+// Replace with your staff log channel ID
+const LOG_CHANNEL_ID = "YOUR_LOG_CHANNEL_ID";
+
+const forbiddenPatterns = [
+    /\b(fuck|shit|bitch|asshole|bastard|dick|pussy|cock|cunt)\b/i,
+    /\b(nigg(er|a)|fag(got)?|tranny|retard)\b/i,
+    /\b(porn|nude|sex|blowjob|anal|hentai|nsfw)\b/i
+];
+
 client.once("ready", () => {
     console.log(`✅ Logged in as ${client.user.tag}`);
 });
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
+
+    const content = message.content.toLowerCase();
+    for (const pattern of forbiddenPatterns) {
+        if (pattern.test(content)) {
+            try {
+                await message.delete();
+                await message.author.send("⚠️ Your message was removed because it contained disallowed content.");
+                const logChannel = await client.channels.fetch(LOG_CHANNEL_ID);
+                if (logChannel && logChannel.isTextBased()) {
+                    logChannel.send(`🚨 Filter violation by **${message.author.tag}** in <#${message.channel.id}>:\n\`${message.content}\``);
+                }
+            } catch (err) {
+                console.error("Failed to log violation:", err);
+            }
+            return;
+        }
+    }
+
     if (!message.guild) return;
     if (!message.content.startsWith("!")) return;
 
@@ -61,5 +88,4 @@ client.on("messageCreate", async (message) => {
 });
 
 client.login(process.env.token);
-
 
