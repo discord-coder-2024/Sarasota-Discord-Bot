@@ -10,6 +10,7 @@ const client = new Client({
 });
 
 const sentDMs = new Map();
+const processedMessages = new Set();
 
 client.once("ready", () => {
     console.log(`✅ Logged in as ${client.user.tag}`);
@@ -17,7 +18,11 @@ client.once("ready", () => {
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
+    if (!message.guild) return; // only process messages from servers
     if (!message.content.startsWith("!")) return;
+    if (processedMessages.has(message.id)) return;
+
+    processedMessages.add(message.id);
 
     const args = message.content.slice(1).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
@@ -26,8 +31,6 @@ client.on("messageCreate", async (message) => {
         const userId = args.shift();
         const dmMessage = args.join(" ");
         if (!userId || !dmMessage) return message.reply("Usage: `!dm <userID> <message>`");
-
-        if (sentDMs.has(message.id)) return;
 
         try {
             const user = await client.users.fetch(userId);
@@ -57,6 +60,6 @@ client.on("messageCreate", async (message) => {
         }
     }
 });
-
 client.login(process.env.token);
+
 
