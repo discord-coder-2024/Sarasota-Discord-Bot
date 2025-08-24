@@ -9,7 +9,7 @@ const client = new Client({
     ],
 });
 
-const sentDMs = new Map(); // Store user DM messages by ID
+const sentDMs = new Map();
 
 client.once("ready", () => {
     console.log(`✅ Logged in as ${client.user.tag}`);
@@ -17,22 +17,22 @@ client.once("ready", () => {
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
+    if (!message.content.startsWith("!")) return;
 
-    const args = message.content.trim().split(/ +/g);
+    const args = message.content.slice(1).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
 
-    if (command === "!dm") {
+    if (command === "dm") {
         const userId = args.shift();
         const dmMessage = args.join(" ");
+        if (!userId || !dmMessage) return message.reply("Usage: `!dm <userID> <message>`");
 
-        if (!userId || !dmMessage) {
-            return message.reply("Usage: `!dm <userID> <message>`");
-        }
+        if (sentDMs.has(message.id)) return;
 
         try {
             const user = await client.users.fetch(userId);
             const sentMessage = await user.send(dmMessage);
-            sentDMs.set(sentMessage.id, sentMessage); // store sent message
+            sentDMs.set(sentMessage.id, sentMessage);
             message.reply(`✅ Message sent to ${user.tag} (ID: ${sentMessage.id})`);
         } catch (error) {
             console.error(error);
@@ -40,18 +40,13 @@ client.on("messageCreate", async (message) => {
         }
     }
 
-    if (command === "!dm-edit") {
+    if (command === "dm-edit") {
         const msgId = args.shift();
         const newMessage = args.join(" ");
-
-        if (!msgId || !newMessage) {
-            return message.reply("Usage: `!dm-edit <msg-id> <new-message>`");
-        }
+        if (!msgId || !newMessage) return message.reply("Usage: `!dm-edit <msg-id> <new-message>`");
 
         const originalMessage = sentDMs.get(msgId);
-        if (!originalMessage) {
-            return message.reply("❌ Could not find a sent DM with that ID.");
-        }
+        if (!originalMessage) return message.reply("❌ Could not find a sent DM with that ID.");
 
         try {
             await originalMessage.edit(newMessage);
