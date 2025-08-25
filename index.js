@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, Partials } from "discord.js";
+Vimport { Client, GatewayIntentBits, Partials } from "discord.js";
 import express from "express";
 import dotenv from "dotenv";
 
@@ -8,7 +8,8 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.DirectMessages
   ],
   partials: [Partials.Channel]
 });
@@ -20,14 +21,34 @@ client.once("ready", () => {
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
-  const triggers = ["hi", "hey", "hello", "hiya"];
   const content = message.content.toLowerCase();
+  const triggers = ["hi", "hey", "hello", "hiya"];
 
   if (triggers.some((word) => content.includes(word))) {
     try {
       await message.react("🙋‍♂️");
     } catch (err) {
       console.error("❌ Could not react:", err);
+    }
+  }
+
+  // --- !dm Command ---
+  if (message.content.startsWith("!dm ")) {
+    const args = message.content.split(" ");
+    const userId = args[1];
+    const dmMessage = args.slice(2).join(" ");
+
+    if (!userId || !dmMessage) {
+      return message.reply("⚠️ Usage: `!dm {id} {message}`");
+    }
+
+    try {
+      const user = await client.users.fetch(userId);
+      await user.send(`📩 **Message from ${message.author.tag}:**\n${dmMessage}`);
+      await message.reply(`✅ Message sent to <@${userId}>`);
+    } catch (err) {
+      console.error("❌ DM Error:", err);
+      await message.reply("⚠️ Could not send the DM.");
     }
   }
 });
@@ -46,3 +67,4 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 client.login(process.env.token);
+
