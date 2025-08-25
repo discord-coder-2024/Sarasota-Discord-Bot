@@ -35,7 +35,7 @@ client.on("messageCreate", async (message) => {
   if (message.content.startsWith("!dm ")) {
     const args = message.content.split(" ");
     const userId = args[1];
-    const dmMessage = args.slice(2).join(" ");
+    let dmMessage = args.slice(2).join(" ");
 
     if (!userId || !dmMessage) {
       return message.reply("⚠️ Usage: `!dm {id} {message}`");
@@ -43,8 +43,30 @@ client.on("messageCreate", async (message) => {
 
     try {
       const user = await client.users.fetch(userId);
+
+      const messageLinkRegex = /https:\/\/discord(?:app)?\.com\/channels\/(\d+)\/(\d+)\/(\d+)/;
+      const match = dmMessage.match(messageLinkRegex);
+
+      if (match) {
+        const [, , channelId, messageId] = match;
+        try {
+          const channel = await client.channels.fetch(channelId);
+          const fetchedMessage = await channel.messages.fetch(messageId);
+
+          if (fetchedMessage.content) {
+            dmMessage = fetchedMessage.content;
+          } else if (fetchedMessage.embeds.length) {
+            dmMessage = fetchedMessage.embeds.map(e => JSON.stringify(e)).join("\n");
+          } else {
+            dmMessage = "[Message has no content]";
+          }
+        } catch {
+          dmMessage = "[Could not fetch message from link]";
+        }
+      }
+
       await user.send(`📩 **Message from ${message.author.tag}:**\n${dmMessage}`);
-      await message.reply(`✅ Message sent to <@${userId}>`);
+      await message.reply(`✅ Message sent to ${user.username}`);
     } catch (err) {
       console.error("❌ DM Error:", err);
       await message.reply("⚠️ Could not send the DM.");
