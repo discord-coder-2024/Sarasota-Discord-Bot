@@ -1,7 +1,6 @@
 import { Client, GatewayIntentBits, Partials } from "discord.js";
 import express from "express";
 import dotenv from "dotenv";
-import fetch from "node-fetch";
 
 dotenv.config();
 
@@ -47,5 +46,3 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 client.login(process.env.token);
-
-
