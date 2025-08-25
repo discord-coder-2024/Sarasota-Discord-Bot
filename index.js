@@ -1,4 +1,4 @@
-Vimport { Client, GatewayIntentBits, Partials } from "discord.js";
+Vimport { client, GatewayIntentBits, Partials } from "discord.js";
 import express from "express";
 import dotenv from "dotenv";
 
