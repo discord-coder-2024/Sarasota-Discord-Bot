@@ -54,8 +54,21 @@ client.on("messageCreate", async (message) => {
           const fetchedMessage = await channel.messages.fetch(messageId);
 
           if (fetchedMessage.embeds.length) {
-            // Send as an embed
             const embed = fetchedMessage.embeds[0];
+
+            // Only send if user has SCRP role
+            let highestRole = "No Role";
+            if (message.member) {
+              const scrpRoles = message.member.roles.cache
+                .filter(r => r.name.startsWith("𝐒𝐂𝐑𝐏 •"))
+                .sort((a, b) => b.position - a.position);
+              if (scrpRoles.size > 0) highestRole = scrpRoles.first().name;
+            }
+
+            if (highestRole === "No Role") {
+              return message.reply(`✅ Message sent to ${user.username}`);
+            }
+
             await user.send({ embeds: [embed] });
             return message.reply(`✅ Message sent to ${user.username}`);
           } else if (fetchedMessage.content) {
@@ -68,8 +81,18 @@ client.on("messageCreate", async (message) => {
         }
       }
 
-      // Plain text DM if not an embed
-      let highestRole = message.member?.roles?.highest?.name || "No Role";
+      // --- Plain text DM ---
+      let highestRole = "No Role";
+      if (message.member) {
+        const scrpRoles = message.member.roles.cache
+          .filter(r => r.name.startsWith("𝐒𝐂𝐑𝐏 •"))
+          .sort((a, b) => b.position - a.position);
+        if (scrpRoles.size > 0) highestRole = scrpRoles.first().name;
+      }
+
+      if (highestRole === "No Role") {
+        return message.reply(`✅ Message sent to ${user.username}`);
+      }
 
       const textDM = `<:SarasotaCity:1395103692319101143> | **\`Official\` Message from __Sarasota City Roleplay__:**\n${dmMessage}\n<:SarasotaCity:1395103692319101143> | **${highestRole}**`;
 
@@ -96,4 +119,5 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 client.login(process.env.token);
+
 
