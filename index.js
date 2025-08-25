@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Partials } = require("discord.js");
+const { Client, GatewayIntentBits, Partials, EmbedBuilder } = require("discord.js");
 const express = require("express");
 const dotenv = require("dotenv");
 
@@ -53,10 +53,13 @@ client.on("messageCreate", async (message) => {
           const channel = await client.channels.fetch(channelId);
           const fetchedMessage = await channel.messages.fetch(messageId);
 
-          if (fetchedMessage.content) {
+          if (fetchedMessage.embeds.length) {
+            // Send as an embed
+            const embed = fetchedMessage.embeds[0];
+            await user.send({ embeds: [embed] });
+            return message.reply(`✅ Message sent to ${user.username}`);
+          } else if (fetchedMessage.content) {
             dmMessage = fetchedMessage.content;
-          } else if (fetchedMessage.embeds.length) {
-            dmMessage = fetchedMessage.embeds.map(e => JSON.stringify(e)).join("\n");
           } else {
             dmMessage = "[Message has no content]";
           }
@@ -65,7 +68,12 @@ client.on("messageCreate", async (message) => {
         }
       }
 
-      await user.send(`📩 **Message from ${message.author.tag}:**\n${dmMessage}`);
+      // Plain text DM if not an embed
+      let highestRole = message.member?.roles?.highest?.name || "No Role";
+
+      const textDM = `<:SarasotaCity:1395103692319101143> | **\`Official\` Message from __Sarasota City Roleplay__:**\n${dmMessage}\n<:SarasotaCity:1395103692319101143> | **${highestRole}**`;
+
+      await user.send(textDM);
       await message.reply(`✅ Message sent to ${user.username}`);
     } catch (err) {
       console.error("❌ DM Error:", err);
