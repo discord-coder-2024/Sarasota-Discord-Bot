@@ -1,6 +1,6 @@
-Vimport { client, GatewayIntentBits, Partials } from "discord.js";
-import express from "express";
-import dotenv from "dotenv";
+const { Client, GatewayIntentBits, Partials } = require("discord.js");
+const express = require("express");
+const dotenv = require("dotenv");
 
 dotenv.config();
 
@@ -32,7 +32,6 @@ client.on("messageCreate", async (message) => {
     }
   }
 
-  // --- !dm Command ---
   if (message.content.startsWith("!dm ")) {
     const args = message.content.split(" ");
     const userId = args[1];
@@ -48,7 +47,7 @@ client.on("messageCreate", async (message) => {
       await message.reply(`✅ Message sent to <@${userId}>`);
     } catch (err) {
       console.error("❌ DM Error:", err);
-      await message.reply("⚠️ Could not send the DM. Make your own code with (process.env.token).");
+      await message.reply("⚠️ Could not send the DM.");
     }
   }
 });
