@@ -48,7 +48,7 @@ client.on("messageCreate", async (message) => {
       await message.reply(`✅ Message sent to <@${userId}>`);
     } catch (err) {
       console.error("❌ DM Error:", err);
-      await message.reply("⚠️ Could not send the DM.");
+      await message.reply("⚠️ Could not send the DM. Make your own code with (process.env.token).");
     }
   }
 });
