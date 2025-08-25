@@ -1,17 +1,15 @@
 {
-  "name": "discord-dm-bot",
+  "name": "discord-bot",
   "version": "1.0.0",
-  "description": "A simple Discord bot with a DM command",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node index.js"
   },
-  "author": "",
   "dependencies": {
-    "discord.js": "^14.13.0",
-    "dotenv": "^16.3.1"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
   }
 }
+
