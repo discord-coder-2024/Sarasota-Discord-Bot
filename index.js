@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Partials, EmbedBuilder } = require("discord.js");
+const { Client, GatewayIntentBits, Partials, EmbedBuilder, ActivityType } = require("discord.js");
 const express = require("express");
 const dotenv = require("dotenv");
 
@@ -16,6 +16,15 @@ const client = new Client({
 
 client.once("ready", () => {
   console.log(`✅ Logged in as ${client.user.tag}`);
+
+  client.user.setPresence({
+    activities: [{ name: "Protecting Sarasota", type: ActivityType.Custom }],
+    status: "online"
+  });
+
+  const totalMembers = client.guilds.cache.reduce((acc, g) => acc + g.memberCount, 0);
+  const rounded = Math.floor(totalMembers / 100) * 100;
+  client.user.setActivity(`Over ${rounded} members`, { type: ActivityType.Watching });
 });
 
 client.on("messageCreate", async (message) => {
@@ -28,8 +37,12 @@ client.on("messageCreate", async (message) => {
     try {
       await message.react("🙋‍♂️");
     } catch (err) {
-      console.error("❌ Could not react:", err);
+      console.error(err);
     }
+  }
+
+  if (message.content.startsWith("!ping")) {
+    return message.channel.send(`🏓 Pong! Bot Latency is ${Date.now() - message.createdTimestamp}ms`);
   }
 
   if (message.content.startsWith("!dm ")) {
@@ -56,7 +69,6 @@ client.on("messageCreate", async (message) => {
           if (fetchedMessage.embeds.length) {
             const embed = fetchedMessage.embeds[0];
 
-            // Only send if user has SCRP role
             let highestRole = "No Role";
             if (message.member) {
               const scrpRoles = message.member.roles.cache
@@ -81,7 +93,6 @@ client.on("messageCreate", async (message) => {
         }
       }
 
-      // --- Plain text DM ---
       let highestRole = "No Role";
       if (message.member) {
         const scrpRoles = message.member.roles.cache
@@ -99,7 +110,7 @@ client.on("messageCreate", async (message) => {
       await user.send(textDM);
       await message.reply(`✅ Message sent to ${user.username}`);
     } catch (err) {
-      console.error("❌ DM Error:", err);
+      console.error(err);
       await message.reply("⚠️ Could not send the DM.");
     }
   }
@@ -119,5 +130,6 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 client.login(process.env.token);
+
 
 
