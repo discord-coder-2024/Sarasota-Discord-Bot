@@ -23,7 +23,7 @@ client.once("ready", () => {
   });
 
   const totalMembers = client.guilds.cache.reduce((acc, g) => acc + g.memberCount, 0);
-  const rounded = Math.floor(totalMembers / 100) * 100;
+  const rounded = Math.floor(totalMembers / 5) * 5;
   client.user.setActivity(`Over ${rounded} members`, { type: ActivityType.Watching });
 });
 
@@ -127,7 +127,7 @@ setInterval(() => {
   fetch(url)
     .then(() => console.log("🔄 Self-ping sent"))
     .catch((err) => console.error("⚠️ Self-ping failed:", err));
-}, 5 * 60 * 1000);
+}, 25 * 1000);
 
 client.login(process.env.token);
 
