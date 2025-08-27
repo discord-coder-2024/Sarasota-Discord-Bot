@@ -53,7 +53,7 @@ client.on("messageCreate", async (message) => {
 
       if (message.mentions.users.has(gamerId)) {
         await message.channel.send(
-          "⚠️ Please do not ping Gamer, as he is probably making out with Vanity, and does not want to be bothered."
+          "⚠️ Don't ping **`Gamer`**."
         );
       } else if (message.mentions.users.has(vanityId)) {
         await message.channel.send(
